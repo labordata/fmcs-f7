@@ -1,7 +1,7 @@
 .PHONY : all
 all : 
 	$(MAKE) update_raw
-	$(MAKE) f7.csv
+	$(MAKE) f7.csv f7.db
 
 f7.db : f7.csv
 	sqlite3 $@ -csv '.import $< f7'
