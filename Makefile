@@ -14,4 +14,4 @@ f7.csv : $(patsubst %.xlsx,%.csv,$(wildcard raw/*.xlsx))
 
 .PHONY : update_raw
 update_raw :
-	curl -k --no-check-certificate https://www.fmcs.gov/resources/documents-and-data/#tab-d3d7f5344cef9bab4d3 | grep Notices.xlsx | sed -n 's/.*href="\([^"]*\).*/\1/p' | wget -nd -i - -P raw -nc
+	curl -k https://www.fmcs.gov/resources/documents-and-data/#tab-d3d7f5344cef9bab4d3 | grep Notices.xlsx | sed -n 's/.*href="\([^"]*\).*/\1/p' | wget --no-check-certificate -nd -i - -P raw -nc
