@@ -7,7 +7,10 @@ f7.db : f7.csv link.csv
 	csvs-to-sqlite $^ $@
 
 no_exact.csv : f7.csv
-	csvcut -c employer,union_name,union_city,union_state,affected_location_city,affected_location_state $< | csvsort | uniq > $@
+	csvcut -c employer,union_name,union_city,union_state,affected_location_city,affected_location_state $< | \
+            python scripts/normalize.py | \
+            csvsort | \
+            uniq > $@
 
 link.csv : no_exact.csv
 	python scripts/link_units.py $< $@ -v -v
