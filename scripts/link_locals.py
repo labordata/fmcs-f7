@@ -23,18 +23,19 @@ def preProcess(column):
     Things like casing, extra spaces, quotes and new lines can be ignored.
     """
 
-    column = re.sub('\n', ' ', column)
-    column = re.sub('/', ' ', column)
-    column = re.sub('-', ' ', column)
-    column = re.sub("'", '', column)
-    column = re.sub(",", '', column)
-    column = re.sub(":", ' ', column)
-    column = re.sub('  +', ' ', column)
-    column = re.sub(r'\bunion\b', ' ', column)
-    column = re.sub(r'\blocal\b', ' ', column)        
+    column = re.sub("\n", " ", column)
+    column = re.sub(r"\bn/a\b", "", column)
+    column = re.sub(r"\bna\b", "", column)
+    column = re.sub("/", " ", column)
+    column = re.sub("-", " ", column)
+    column = re.sub("'", "", column)
+    column = re.sub(",", "", column)
+    column = re.sub(":", " ", column)
+    column = re.sub(r"\blocal\b", "", column)
+    column = re.sub("  +", " ", column)
     column = column.strip().strip('"').strip("'").lower().strip()
-    column = ' '.join(token.lstrip('0') for token in column.split())
-        
+    column = " ".join(token.lstrip("0") for token in column.split())
+
     if not column:
         column = None
     return column
@@ -56,6 +57,7 @@ def readData(filename):
 
     return data_d
 
+
 def readMessyData(filename):
 
     data_d = {}
@@ -64,16 +66,17 @@ def readMessyData(filename):
         reader = csv.DictReader(f)
         for i, row in enumerate(reader):
             clean_row = dict([(k, preProcess(v)) for (k, v) in row.items()])
-            clean_row['abbr_local_name'] = clean_row['full_local_name'] = clean_row['union_name']
-            clean_row['city'] = clean_row['union_city']
-            clean_row['state'] = clean_row['union_state']
+            clean_row["abbr_local_name"] = clean_row["full_local_name"] = clean_row[
+                "union_name"
+            ]
+            clean_row["city"] = clean_row["union_city"]
+            clean_row["state"] = clean_row["union_state"]
             data_d[filename + str(i)] = dict(clean_row)
 
     return data_d
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
     # ## Logging
@@ -81,9 +84,13 @@ if __name__ == '__main__':
     # dedupe uses Python logging to show or suppress verbose output. Added for convenience.
     # To enable verbose logging, run `python examples/csv_example/csv_example.py -v`
     optp = optparse.OptionParser()
-    optp.add_option('-v', '--verbose', dest='verbose', action='count',
-                    help='Increase verbosity (specify multiple times for more)'
-                    )
+    optp.add_option(
+        "-v",
+        "--verbose",
+        dest="verbose",
+        action="count",
+        help="Increase verbosity (specify multiple times for more)",
+    )
     (opts, args) = optp.parse_args()
     log_level = logging.WARNING
     if opts.verbose:
@@ -97,32 +104,31 @@ if __name__ == '__main__':
     # ## Setup
 
     output_file = sys.argv[3]
-    settings_file = 'data_matching_learned_settings'
-    training_file = 'data_matching_training.json'
+    settings_file = "data_matching_learned_settings"
+    training_file = "data_matching_training.json"
 
     left_file = sys.argv[1]
     right_file = sys.argv[2]
 
-    print('importing data ...')
+    print("importing data ...")
     data_1 = readMessyData(left_file)
     data_2 = readData(right_file)
 
     def abbr_names():
         for dataset in (data_1, data_2):
             for record in dataset.values():
-                yield record['abbr_local_name']
+                yield record["abbr_local_name"]
 
     def full_names():
         for dataset in (data_1, data_2):
             for record in dataset.values():
-                yield record['full_local_name']
-                
+                yield record["full_local_name"]
 
     # ## Training
 
     if os.path.exists(settings_file):
-        print('reading from', settings_file)
-        with open(settings_file, 'rb') as sf:
+        print("reading from", settings_file)
+        with open(settings_file, "rb") as sf:
             linker = dedupe.StaticRecordLink(sf)
 
     else:
@@ -131,12 +137,13 @@ if __name__ == '__main__':
         # Notice how we are telling the linker to use a custom field comparator
         # for the 'price' field.
         fields = [
-            {'field': 'abbr_local_name', 'type': 'ShortString'},
-            {'field': 'full_local_name', 'type': 'ShortString'},
-            {'field': 'abbr_local_name', 'type': 'Text', 'corpus': abbr_names()},
-            {'field': 'full_local_name', 'type': 'Text', 'corpus': full_names()},            
-            {'field': 'city', 'type': 'String', 'has missing': True},
-            {'field': 'state', 'type': 'String', 'has missing': True}]
+            {"field": "abbr_local_name", "type": "ShortString"},
+            {"field": "full_local_name", "type": "ShortString"},
+            {"field": "abbr_local_name", "type": "Text", "corpus": abbr_names()},
+            {"field": "full_local_name", "type": "Text", "corpus": full_names()},
+            {"field": "city", "type": "String", "has missing": True},
+            {"field": "state", "type": "String", "has missing": True},
+        ]
 
         # add interaction for BAC
 
@@ -147,12 +154,11 @@ if __name__ == '__main__':
         # look for it an load it in.
         # __Note:__ if you want to train from scratch, delete the training_file
         if os.path.exists(training_file):
-            print('reading labeled examples from ', training_file)
+            print("reading labeled examples from ", training_file)
             with open(training_file) as tf:
-                linker.prepare_training(data_1,
-                                        data_2,
-                                        training_file=tf,
-                                        sample_size=15000)
+                linker.prepare_training(
+                    data_1, data_2, training_file=tf, sample_size=15000
+                )
         else:
             linker.prepare_training(data_1, data_2, sample_size=15000)
 
@@ -162,20 +168,20 @@ if __name__ == '__main__':
         # or not.
         # use 'y', 'n' and 'u' keys to flag duplicates
         # press 'f' when you are finished
-        print('starting active labeling...')
+        print("starting active labeling...")
 
         dedupe.console_label(linker)
 
         linker.train()
 
         # When finished, save our training away to disk
-        with open(training_file, 'w') as tf:
+        with open(training_file, "w") as tf:
             linker.write_training(tf)
 
         # Save our weights and predicates to disk.  If the settings file
         # exists, we will skip all the training and learning next time we run
         # this file.
-        with open(settings_file, 'wb') as sf:
+        with open(settings_file, "wb") as sf:
             linker.write_settings(sf)
 
     # ## Blocking
@@ -189,10 +195,10 @@ if __name__ == '__main__':
     # If we had more data, we would not pass in all the blocked data into
     # this function but a representative sample.
 
-    print('clustering...')
-    linked_records = linker.join(data_1, data_2, 0.0, constraint='many-to-one')
+    print("clustering...")
+    linked_records = linker.join(data_1, data_2, 0.0, constraint="many-to-one")
 
-    print('# duplicate sets', len(linked_records))
+    print("# duplicate sets", len(linked_records))
     # ## Writing Results
 
     # Write our original data back out to a CSV with a new column called
@@ -201,26 +207,23 @@ if __name__ == '__main__':
     match = {}
     for cluster_id, (cluster, score) in enumerate(linked_records):
         source, canonical = cluster
-        match[source] = {'canon_id': data_2[canonical]['f_num'],
-                         'Link Score': score}
+        match[source] = {"canon_id": data_2[canonical]["f_num"], "Link Score": score}
 
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
 
         with open(left_file) as f_input:
             reader = csv.DictReader(f_input)
 
-            fieldnames = (['canon_id', 'Link Score'] +
-                          reader.fieldnames)
+            fieldnames = ["canon_id", "Link Score"] + reader.fieldnames
 
-            writer = csv.DictWriter(f,
-                                    fieldnames=fieldnames)
-            
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+
             writer.writeheader()
-                                
+
             for row_id, row in enumerate(reader):
 
                 record_id = left_file + str(row_id)
                 cluster_details = match.get(record_id, {})
                 row.update(cluster_details)
-                
+
                 writer.writerow(row)
