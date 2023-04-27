@@ -3,7 +3,7 @@ all :
 	$(MAKE) update_raw
 	$(MAKE) f7.csv f7.db
 
-f7.db : f7.csv f7_opdr.csv
+f7.db : f7.csv
 	csvs-to-sqlite $^ $@
 
 f7_opdr.csv : f7.csv link_units.csv
