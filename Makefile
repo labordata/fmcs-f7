@@ -18,7 +18,7 @@ no_exact_unions.csv : f7.csv
 link_units.csv : no_exact_unions.csv
 	unionlookup $< $@ -v -v
 
-f7.csv : $(patsubst %.xlsx,%.csv,$(wildcard raw/*Notices.xlsx))
+f7.csv : $(patsubst %.xlsx,%.csv,$(wildcard raw/*Notices*.xlsx)) $(patsubst %.xls,%.csv,$(wildcard raw/*Notices*.xls))
 	python scripts/to_csv.py $^ | \
             csvsort | \
             uniq | \
@@ -26,6 +26,9 @@ f7.csv : $(patsubst %.xlsx,%.csv,$(wildcard raw/*Notices.xlsx))
             sed '1s/line_number/id/' > $@
 
 %.csv : %.xlsx
+	in2csv $< | sed '/^Notice Date/,$$!d' > $@
+
+%.csv : %.xls
 	in2csv $< | sed '/^Notice Date/,$$!d' > $@
 
 .PHONY : update_raw
