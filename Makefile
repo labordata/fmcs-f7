@@ -18,7 +18,7 @@ no_exact_unions.csv : f7.csv
 link_units.csv : no_exact_unions.csv
 	unionlookup $< $@ -v -v
 
-f7.csv : $(patsubst %.xlsx,%.csv,$(wildcard raw/*.xlsx))
+f7.csv : $(patsubst %.xlsx,%.csv,$(wildcard raw/*Notices.xlsx))
 	python scripts/to_csv.py $^ | \
             csvsort | \
             uniq | \
