@@ -1,5 +1,15 @@
-import sys
 import csv
+import sys
+
+import xlrd
+
+
+def fix_excel_dates(date_str):
+    if date_str.endswith(".0"):
+        return xlrd.xldate_as_datetime(float(date_str), 0).date()
+    else:
+        return date_str
+
 
 HEADER = (
     "notice_date",
@@ -73,6 +83,7 @@ header_set.update({"", "e-street_2", "u-street_2"})
 writer = csv.DictWriter(sys.stdout, fieldnames=HEADER, extrasaction="ignore")
 writer.writeheader()
 
+
 for filename in sys.argv[1:]:
     with open(filename) as f:
         reader = csv.DictReader(f)
@@ -97,5 +108,8 @@ for filename in sys.argv[1:]:
                 row["employer_street"] += "\n" + row.pop("e-street_2")
             if "u-street_2" in row:
                 row["union_street"] += "\n" + row.pop("u-street_2")
+            row["notice_date"] = fix_excel_dates(row["notice_date"])
+            if "initiated_date" in row:
+                row["initiated_date"] = fix_excel_dates(row["initiated_date"])
 
             writer.writerow(row)

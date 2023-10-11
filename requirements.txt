@@ -3,3 +3,4 @@ csvs-to-sqlite
 https://github.com/labordata/union-gazetteer/archive/refs/heads/main.zip
 rlr
 pandas<2
+xlrd
