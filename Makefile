@@ -1,3 +1,5 @@
+.SHELLFLAGS = /bin/bash -o pipefail.
+
 .PHONY : all
 all : 
 	$(MAKE) update_raw
@@ -26,10 +28,11 @@ f7.csv : $(patsubst %.xlsx,%.csv,$(wildcard raw/*Notices*.xlsx)) $(patsubst %.xl
             sed '1s/line_number/id/' > $@
 
 %.csv : %.xlsx
-	in2csv $< | sed '/^Notice Date/,$$!d' > $@
+	(in2csv $< || in2csv $< -K 5) | sed '/^Notice Date/,$$!d' > $@
 
 %.csv : %.xls
 	in2csv $< | sed '/^Notice Date/,$$!d' > $@
+
 
 .PHONY : update_raw
 update_raw :
