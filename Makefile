@@ -1,4 +1,4 @@
-.SHELLFLAGS = /bin/bash -o pipefail.
+SHELL=/bin/bash -o pipefail
 
 .PHONY : all
 all : 
