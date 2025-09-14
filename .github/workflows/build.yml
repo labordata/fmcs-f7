@@ -55,5 +55,5 @@ jobs:
         run: |
           curl -I https://warehouse.fly.dev/
           gzip f7.db
-          flyctl ssh sftp put f7.db.gz /dbs/f7.db.gz
-          flyctl ssh console -C 'flock /tmp/inspect.lock -c "cd /dbs && gunzip -f /dbs/f7.db.gz && datasette inspect /dbs/*.db --inspect-file /dbs/inspect-data.json"'
+          flyctl ssh sftp put f7.db.gz /dbs/f7.db.gz -a warehouse
+          flyctl ssh console -C 'flock /tmp/inspect.lock -c "cd /dbs && gunzip -f /dbs/f7.db.gz && datasette inspect /dbs/*.db --inspect-file /dbs/inspect-data.json"' -a warehouse
