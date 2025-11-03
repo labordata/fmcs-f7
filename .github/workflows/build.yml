@@ -47,14 +47,3 @@ jobs:
         with:
            github_token: ${{ secrets.GITHUB_TOKEN }}
            publish_dir: ./public
-      - name: Setup Flyctl
-        uses: superfly/flyctl-actions/setup-flyctl@v1
-      - name: Update db in fly
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}      
-        run: |
-          curl -I https://warehouse.fly.dev/
-          gzip f7.db
-          flyctl ssh sftp put f7.db.gz /dbs/f7.db.gz -a warehouse
-          flyctl ssh console -C 'flock /tmp/inspect.lock -c "cd /dbs && gunzip -f /dbs/f7.db.gz && datasette inspect /dbs/*.db --inspect-file /dbs/inspect-data.json"' -a warehouse
-          flyctl apps restart warehouse
