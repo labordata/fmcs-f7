@@ -1,5 +1,4 @@
 csvkit
-https://github.com/labordata/union-gazetteer/archive/refs/heads/main.zip
 rlr
 xlrd
 https://github.com/LuighiV/csvs-to-sqlite/archive/refs/heads/main.zip
