@@ -23,9 +23,7 @@ link_units.csv : no_exact_unions.csv
 f7.csv : $(patsubst %.xlsx,%.csv,$(wildcard raw/*Notices*.xlsx)) $(patsubst %.xls,%.csv,$(wildcard raw/*Notices*.xls))
 	python scripts/to_csv.py $^ | \
             csvsort | \
-            uniq | \
-            csvcut -x -l | \
-            sed '1s/line_number/id/' > $@
+            uniq > $@
 
 %.csv : %.xlsx
 	(in2csv $< || in2csv $< -K 5) | sed '/^Notice Date/,$$!d' > $@
