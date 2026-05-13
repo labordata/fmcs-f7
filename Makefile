@@ -8,15 +8,6 @@ all :
 f7.db : f7.csv
 	csvs-to-sqlite $^ $@
 
-no_exact_unions.csv : f7.csv
-	csvcut -c union_name,union_city,union_state $< | \
-            python scripts/normalize.py | \
-            csvsort | \
-            uniq > $@
-
-link_units.csv : no_exact_unions.csv
-	unionlookup $< $@ -v -v
-
 f7.csv : $(patsubst %.xlsx,%.csv,$(wildcard raw/*Notices*.xlsx)) $(patsubst %.xls,%.csv,$(wildcard raw/*Notices*.xls))
 	python scripts/to_csv.py $^ | \
             csvsort | \
