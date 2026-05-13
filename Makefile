@@ -8,9 +8,6 @@ all :
 f7.db : f7.csv
 	csvs-to-sqlite $^ $@
 
-f7_opdr.csv : f7.csv link_units.csv
-	csvsql -I --query 'select id as f7_id, canon_id as f_num from f7 inner join link_units on trim(lower(f7.union_name)) = link_units.union_name and trim(lower(f7.union_city)) = link_units.union_city and trim(lower(f7.union_state)) = link_units.union_state where canon_id is not null' $^ > $@
-
 no_exact_unions.csv : f7.csv
 	csvcut -c union_name,union_city,union_state $< | \
             python scripts/normalize.py | \
