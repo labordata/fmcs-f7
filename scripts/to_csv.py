@@ -1,14 +1,30 @@
 import csv
+import re
 import sys
 
 import xlrd
 
+TIME_ONLY = re.compile(r"^\d{1,2}:\d{2}(:\d{2})?$")
+EXCEL_EPOCH_SENTINELS = {"1899-12-29", "1899-12-30", "1899-12-31"}
+
 
 def fix_excel_dates(date_str):
+    if not date_str:
+        return ""
+    if TIME_ONLY.match(date_str):
+        return ""
+    if date_str in EXCEL_EPOCH_SENTINELS:
+        return ""
     if date_str.endswith(".0"):
-        return xlrd.xldate_as_datetime(float(date_str), 0).date()
-    else:
-        return date_str
+        try:
+            converted = xlrd.xldate_as_datetime(float(date_str), 0).date()
+        except (ValueError, xlrd.xldate.XLDateError):
+            return ""
+        iso = converted.isoformat()
+        if iso in EXCEL_EPOCH_SENTINELS:
+            return ""
+        return iso
+    return date_str
 
 
 HEADER = (
@@ -111,5 +127,7 @@ for filename in sys.argv[1:]:
             row["notice_date"] = fix_excel_dates(row["notice_date"])
             if "initiated_date" in row:
                 row["initiated_date"] = fix_excel_dates(row["initiated_date"])
+            if "expiration_date" in row:
+                row["expiration_date"] = fix_excel_dates(row["expiration_date"])
 
             writer.writerow(row)
