@@ -34,7 +34,7 @@ def strip_trailing_zero(value):
 
 
 def fix_zip(value):
-    value = strip_trailing_zero(value)
+    value = strip_trailing_zero(value.strip("-"))
     if value.isdigit():
         if len(value) == 4:
             value = "0" + value
@@ -159,6 +159,9 @@ for filename in sys.argv[1:]:
                 row["employer_street"] += "\n" + row.pop("e-street_2")
             if "u-street_2" in row:
                 row["union_street"] += "\n" + row.pop("u-street_2")
+            for col in list(row):
+                if row[col]:
+                    row[col] = row[col].strip().strip("_")
             row["notice_date"] = fix_excel_dates(row["notice_date"])
             if "initiated_date" in row:
                 row["initiated_date"] = fix_excel_dates(row["initiated_date"])
