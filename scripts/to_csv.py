@@ -27,6 +27,41 @@ def fix_excel_dates(date_str):
     return date_str
 
 
+def strip_trailing_zero(value):
+    if value.endswith(".0"):
+        return value[:-2]
+    return value
+
+
+def fix_zip(value):
+    value = strip_trailing_zero(value)
+    if value.isdigit():
+        if len(value) == 4:
+            value = "0" + value
+        elif len(value) == 8:
+            value = "0" + value
+        if len(value) == 9:
+            return value[:5] + "-" + value[5:]
+    return value
+
+
+def fix_phone(value):
+    value = strip_trailing_zero(value)
+    if value.isdigit() and len(value) == 10:
+        return "(%s) %s-%s" % (value[:3], value[3:6], value[6:])
+    return value
+
+
+ZIP_FIELDS = (
+    "employer_zip",
+    "union_zip",
+    "affected_location_zip",
+    "location_negotiation_zip",
+)
+PHONE_FIELDS = ("employer_representative_phone", "union_representative_phone")
+INT_FIELDS = ("naics", "bargaining_unit_size", "establishment_size")
+
+
 HEADER = (
     "notice_date",
     "initiated_date",
@@ -129,5 +164,14 @@ for filename in sys.argv[1:]:
                 row["initiated_date"] = fix_excel_dates(row["initiated_date"])
             if "expiration_date" in row:
                 row["expiration_date"] = fix_excel_dates(row["expiration_date"])
+            for col in ZIP_FIELDS:
+                if col in row:
+                    row[col] = fix_zip(row[col])
+            for col in PHONE_FIELDS:
+                if col in row:
+                    row[col] = fix_phone(row[col])
+            for col in INT_FIELDS:
+                if col in row:
+                    row[col] = strip_trailing_zero(row[col])
 
             writer.writerow(row)
