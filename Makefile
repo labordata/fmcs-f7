@@ -1,9 +1,15 @@
 SHELL=/bin/bash -o pipefail
 
 .PHONY : all
-all : 
+all :
 	$(MAKE) update_raw
 	$(MAKE) f7.csv f7.db
+	$(MAKE) check
+
+# Guard against a year silently dropping out of the build (see issue #16).
+.PHONY : check
+check : f7.db
+	python scripts/check_coverage.py f7.db
 
 f7.db : f7.csv
 	csvs-to-sqlite $^ $@
