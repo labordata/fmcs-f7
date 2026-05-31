@@ -89,6 +89,7 @@ HEADER = (
     "expiration_date",
     "naics",
     "industry",
+    "industry_letter",
     "bargaining_unit_size",
     "establishment_size",
     "notice_submitted_by",
@@ -162,6 +163,16 @@ for filename in sys.argv[1:]:
             for col in list(row):
                 if row[col]:
                     row[col] = row[col].strip().strip("_")
+            # Before ~2005, the `industry` field carried a single-letter FMCS
+            # industry code instead of a NAICS code or a spelled-out sector.
+            # Split those legacy codes into their own column so `industry` holds
+            # only modern spelled-out names. See issue #16.
+            industry = (row.get("industry") or "").strip()
+            if len(industry) == 1 and industry.isalpha():
+                row["industry_letter"] = industry.upper()
+                row["industry"] = ""
+            else:
+                row["industry_letter"] = ""
             row["notice_date"] = fix_excel_dates(row["notice_date"])
             if "initiated_date" in row:
                 row["initiated_date"] = fix_excel_dates(row["initiated_date"])
